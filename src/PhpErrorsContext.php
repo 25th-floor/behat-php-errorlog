@@ -63,13 +63,8 @@ class PHPErrorsContext extends RawMinkContext
     public function preparePHPErrorLogFile(BeforeScenarioScope $scope)
     {
         $this->filename = false;
-        // no need to do something if this is an empty scenario
-        if (!$scope->getScenario()->hasSteps() && !$scope->getFeature()->hasBackground()) {
-            return;
-        }
 
-        // ignore scenarios with the ignore tag
-        if ($scope->getScenario()->hasTag(self::IGNORE_TAG) || $scope->getFeature()->hasTag(self::IGNORE_TAG)) {
+        if ($this->ignoreScenario($scope)) {
             return;
         }
 
@@ -132,8 +127,8 @@ class PHPErrorsContext extends RawMinkContext
      */
     public function lookForPHPErrors(AfterScenarioScope $scope)
     {
-        // ignore scenarios with the ignore tag
-        if ($scope->getScenario()->hasTag(self::IGNORE_TAG)) {
+        // ignore scenario
+        if ($this->ignoreScenario($scope)) {
             return;
         }
 
@@ -142,6 +137,7 @@ class PHPErrorsContext extends RawMinkContext
         // nothing in the file
         $filesize = filesize($path);
         if (0 == $filesize) {
+            unlink($path); // cleanup
             return;
         }
 
@@ -158,6 +154,28 @@ class PHPErrorsContext extends RawMinkContext
         }
 
         throw new \Exception($message);
+    }
+
+    /**
+     * should we ignore the scenario
+     *
+     * @param ScenarioScope $scope
+     *
+     * @return bool
+     */
+    protected function ignoreScenario(ScenarioScope $scope)
+    {
+        // no need to do something if this is an empty scenario
+        if (!$scope->getScenario()->hasSteps() && !$scope->getFeature()->hasBackground()) {
+            return true;
+        }
+
+        // ignore scenarios with the ignore tag
+        if ($scope->getScenario()->hasTag(self::IGNORE_TAG) || $scope->getFeature()->hasTag(self::IGNORE_TAG)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
