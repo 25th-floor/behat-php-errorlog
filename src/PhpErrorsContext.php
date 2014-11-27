@@ -86,7 +86,7 @@ class PHPErrorsContext extends RawMinkContext
             if ($this->url == null) {
                 throw new \Exception('Need Url Configuration for selenium tests');
             }
-            echo "Sending Database Name through " . $this->url . $path . PHP_EOL;
+            echo "Sending Php Error Log through " . $this->url . $path . PHP_EOL;
             $this->visitPath($this->url . urlencode($path));
             $this->filename = false; // don't do anything stupid
             return;
